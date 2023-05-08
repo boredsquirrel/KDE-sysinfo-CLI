@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# Define color and formatting variables
+BLUE='\033[0;34m'
+BOLD='\033[1m'
+RESET='\033[0m'
+
+# Define help message
+
+HELP_MSG='\n--- System-Info ---\n\nDisplay KDE Plasma System Information from the Terminal.\n\nAdd an Application-name to add its information.\nExample:\nsysinfo konsole\n\nClipboard copying on Wayland and X11 supported.\n\nUse -h to show this help\n\n--------------------'
+
+# Argument loop
+# if argument is help, show help
+if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
+    echo -e $HELP_MSG && exit 1
+# if argument something else, see if its an app
+elif [[ $# -eq 1 ]]; then
+    # check the app with various package managers
+    appvalue="$(rpm -q $1 || dpkg-query -W $1 || pacman -Qi $1 || zypper info $1 || yum info $1 || pamac info $1 || apk info $1)"
+    # if appvalue not existent, app not found. Maybe an exotic package manager is missing, feel free to add it!
+    if [ -z "$appvalue" ]; then
+      echo "Program not found"
+      # Exit the whole script to save time
+      exit 1
+    else
+    appvalue="Problematic App: $appvalue"
+    fi
+fi
+
+
+# ------ GET SOFTWARE INFO -----
+
+# only echo the combined pretty name of the OS
+OSinfo="OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d '"' -f 2)"
+
+Plasmainfo="KDE Plasma: $(plasmashell --version | awk '{print $2}')"
+
+FWinfo="$(kf5-config --version | grep "KDE Frameworks: ")"
+
+Qtinfo="$(kf5-config --version | grep "Qt: ")"
+
+Kernelinfo="Kernel: $(uname -r)"
+
+# echo session manager, make first letter capital, yes that was nessecary
+Compositorinfo="Compositor: $(echo $XDG_SESSION_TYPE | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')"
+
+# ------- GET HARDWARE INFO ---------
+
+# echo Processor model, remove its own value name ".*: "
+CPUinfo="CPU: $(grep 'model name' /proc/cpuinfo | head -1 | sed 's/.*: //'
+)"
+
+# echo specific lines from meminfo, shorten value to one decimal place, make it GB
+RAMinfo="RAM: $(grep 'MemTotal' /proc/meminfo | awk '{printf "%.1f GB\n", $2/1024/1024}')"
+
+# echo GLXinfo, some strange parameters Ei, cut first two lines, remove "Device:", "everything in brackets" and "TAB" (before the next line)
+GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device: //g' -e 's/ ([^()]*)//g' -e 's/    //g')"
+
+
+
+# ----- OUTPUT AND CLIPBOARD COPY ------
+
+# Visual printing:
+# printf "$appvalue \n${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n \n"
+
+
+# Clipboard
+while true; do
+    read -p "Copy to clipboard? (y/n) " yn
+    case $yn in
+        [Yy]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
+        [Nn]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo" && break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
