@@ -16,14 +16,14 @@ if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
 # if argument something else, see if its an app
 elif [[ $# -eq 1 ]]; then
     # check the app with various package managers
-    appvalue="$(rpm -q $1 || dpkg-query -W $1 || pacman -Qi $1 || zypper info $1 || yum info $1 || pamac info $1 || apk info $1)"
+    appvalue="$(rpm -qa | grep $1 || dpkg-query -W $1 || pacman -Qi $1 || pamac info $1 || emerge --search $1 || apk info $1 || nix-env -q | grep $1 || yay -Si $1 || snap info $1 || flatpak search $1)"
     # if appvalue not existent, app not found. Maybe an exotic package manager is missing, feel free to add it!
     if [ -z "$appvalue" ]; then
       echo "Program not found"
       # Exit the whole script to save time
       exit 1
     else
-    appvalue="Problematic App: $appvalue"
+    appvalue="Specified App: $appvalue"
     fi
 fi
 
@@ -60,16 +60,16 @@ GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device:
 
 # ----- OUTPUT AND CLIPBOARD COPY ------
 
-# Visual printing:
-# printf "$appvalue \n${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n \n"
+#Visual printing:
+printf "\n$appvalue\n\n${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n \n"
 
 
 # Clipboard
 while true; do
     read -p "Copy to clipboard? (y/n) " yn
     case $yn in
-        [Yy]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
-        [Nn]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo" && break;;
+        [Yy]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) >/dev/null && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
+        [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
 done
