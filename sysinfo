@@ -23,7 +23,7 @@ elif [[ $# -eq 1 ]]; then
       # Exit the whole script to save time
       exit 1
     else
-    appvalue="Specified App: $appvalue"
+    appvalue="\nSpecified App: $appvalue\n\n"
     fi
 fi
 
@@ -31,7 +31,7 @@ fi
 # ------ GET SOFTWARE INFO -----
 
 # only echo the combined pretty name of the OS
-OSinfo="OS: $(cat /etc/os-release | grep PRETTY_NAME | cut -d '"' -f 2)"
+OSinfo="OS: $(grep 'PRETTY_NAME' /etc/os-release | cut -d '"' -f 2)"
 
 Plasmainfo="KDE Plasma: $(plasmashell --version | awk '{print $2}')"
 
@@ -42,7 +42,7 @@ Qtinfo="$(kf5-config --version | grep "Qt: ")"
 Kernelinfo="Kernel: $(uname -r)"
 
 # echo session manager, make first letter capital, yes that was nessecary
-Compositorinfo="Compositor: $(echo $XDG_SESSION_TYPE | awk '{print toupper(substr($0, 1, 1)) substr($0, 2)}')"
+Compositorinfo="Compositor: $(echo $XDG_SESSION_TYPE)"
 
 # ------- GET HARDWARE INFO ---------
 
@@ -61,7 +61,7 @@ GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device:
 # ----- OUTPUT AND CLIPBOARD COPY ------
 
 #Visual printing:
-printf "\n$appvalue\n\n${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n \n"
+printf "$appvalue${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n \n"
 
 
 # Clipboard
