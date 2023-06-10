@@ -23,7 +23,7 @@ elif [[ $# -eq 1 ]]; then
       # Exit the whole script to save time
       exit 1
     else
-    appvalue="\nSpecified App: $appvalue\n\n"
+    appvalue="Specified App:\n$appvalue\n\n"
     fi
 fi
 
@@ -68,7 +68,7 @@ printf "$appvalue${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo
 while true; do
     read -p "Copy to clipboard? (y/n) > " yn
     case $yn in
-        [Yy]* ) echo -e "$appvalue\n\n--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) >/dev/null && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
+        [Yy]* ) echo -e "$appvalue--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) >/dev/null && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
         [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
