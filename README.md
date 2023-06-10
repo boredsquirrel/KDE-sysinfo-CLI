@@ -35,7 +35,8 @@ Use -h to show this help
 --------------------
 /v/h/user ❯❯❯ sysinfo konsole
 
-Specified App: konsole5-part-22.12.3-1.fc38.x86_64
+Specified App:
+konsole5-part-22.12.3-1.fc38.x86_64
 konsole5-22.12.3-1.fc38.x86_64
 
 --- Software ---  
@@ -63,6 +64,7 @@ wget https://raw.githubusercontent.com/trytomakeyouprivate/KDE-sysinfo-CLI/main/
 ```
 
 ### To-Do
+- fixing Flatpak output
 - offline Flatpak app infos
   - complex problem, needs exact appID, something like
   - `flatpak search $1 | awk 'NR==2 {print $3}' | xargs flatpak info`
