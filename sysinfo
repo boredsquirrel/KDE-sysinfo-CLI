@@ -16,7 +16,7 @@ if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
 # if argument something else, see if its an app
 elif [[ $# -eq 1 ]]; then
     # check the app with various package managers
-    appvalue="$(rpm -qa | grep $1 || dpkg-query -W $1 || pacman -Qi $1 || pamac info $1 || emerge --search $1 || apk info $1 || nix-env -q | grep $1 || yay -Si $1 || snap info $1 || flatpak list | grep $1 || flatpak search $1)"
+    appvalue="$(rpm -qa 2>/dev/null | grep $1 || dpkg-query -W $1 2>/dev/null || pacman -Qi $1 2>/dev/null || pamac info $1 2>/dev/null || emerge --search $1 2>/dev/null || apk info $1 2>/dev/null || nix-env -q 2>/dev/null | grep $1 || yay -Si $1 2>/dev/null || snap info $1 2>/dev/null || flatpak list 2>/dev/null | grep $1 || flatpak search $1 2>/dev/null)"
     # if appvalue not existent, app not found. Maybe an exotic package manager is missing, feel free to add it!
     if [ -z "$appvalue" ]; then
       echo "Program not found"
