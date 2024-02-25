@@ -64,11 +64,11 @@ GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device:
 # ---------------------- Audio Information, Pipewire or Pulseaudio --------------
 # Check if user has pipewire installed
 if command -v "pipewire -h" >/dev/null 2>&1; then
-    AudioInfo = "Pipewire"
+    AudioInfo="Audio: Pipewire"
 elif command -v pulseaudio >/dev/null 2>&1; then
-    AudioInfo = "Pulseaudio"
+    AudioInfo="Audio: Pulseaudio"
 else
-    AudioInfo = "unknown"
+    AudioInfo="Audio: unknown"
 fi
 
 
