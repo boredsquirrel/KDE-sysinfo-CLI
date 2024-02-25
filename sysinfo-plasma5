@@ -62,25 +62,6 @@ GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device:
 
 
 # ---------------------- Audio Information, Pipewire or Pulseaudio --------------
-
-# Check if user has JACK installed
-if command -v jackd >/dev/null 2>&1; then
-    AudioInfo="Audio: Jack"
-
-# else check if user uses Alsa
-else
-    if command -v alsamixer >/dev/null 2>&1; then
-        AudioInfo="Audio: Alsa"
-    fi
-fi
-
-# if Jack is used, check if it is the soundserver
-if [[ $AudioInfo == "Jack" ]]; then
-    if command -v alsamixer >/dev/null 2>&1; then
-        AudioInfo += ", Alsa"
-    fi
-fi
-
 # Check if user has pipewire installed
 if command -v "pipewire -h" >/dev/null 2>&1; then
     AudioInfo += ", Pipewire"
