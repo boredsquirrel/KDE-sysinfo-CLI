@@ -12,6 +12,23 @@ RESET='\033[0m'
 
 HELP_MSG='\n--- System-Info ---\n\nDisplay KDE Plasma System Information from the Terminal.\n\nAdd an Application-name to add its information.\nExample:\nsysinfo konsole\n\nClipboard copying on Wayland and X11 supported.\n\nUse -h to show this help\n\n--------------------'
 
+function package_info() {
+    rpm -qa 2>/dev/null | grep $1 || dpkg-query -W $1 2>/dev/null || pacman -Qi $1 2>/dev/null || pamac info $1 2>/dev/null || emerge --search $1 2>/dev/null || apk info $1 2>/dev/null || nix-env -q 2>/dev/null | grep $1 || yay -Si $1 2>/dev/null || snap info $1 2>/dev/null || flatpak list 2>/dev/null | grep $1 || flatpak search $1 2>/dev/null
+}
+
+function gpudriver() {
+    # Check if Nvidia driver is being used
+    if lsmod | grep -q "^nvidia "; then
+        GPUdriver="driver: NVIDIA prop."
+    elif lsmod | grep -q "^nouveau "; then
+        GPUdriver="driver: Nouveau"
+    elif lspci | grep -iqE "VGA compatible controller: (Intel|Advanced Micro Devices)"; then
+        GPUdriver="driver: mesa"
+    else
+        GPUdriver="driver: unknown"
+    fi
+}
+
 # Argument loop
 # if argument is help, show help
 if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
@@ -19,7 +36,7 @@ if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
 # if argument something else, see if its an app
 elif [[ $# -eq 1 ]]; then
     # check the app with various package managers
-    appvalue="$(rpm -qa 2>/dev/null | grep $1 || dpkg-query -W $1 2>/dev/null || pacman -Qi $1 2>/dev/null || pamac info $1 2>/dev/null || emerge --search $1 2>/dev/null || apk info $1 2>/dev/null || nix-env -q 2>/dev/null | grep $1 || yay -Si $1 2>/dev/null || snap info $1 2>/dev/null || flatpak list 2>/dev/null | grep $1 || flatpak search $1 2>/dev/null)"
+    appvalue=package_info $1
     # if appvalue not existent, app not found. Maybe an exotic package manager is missing, feel free to add it!
     if [ -z "$appvalue" ]; then
       echo "Program not found"
@@ -59,7 +76,7 @@ RAMinfo="RAM: $(grep 'MemTotal' /proc/meminfo | awk '{printf "%.1f GB\n", $2/102
 # echo GLXinfo, some strange parameters Ei, cut first two lines, remove "Device:", "everything in brackets" and "TAB" (before the next line)
 GPUinfo="GPU: $(glxinfo | grep -Ei 'device|memory' | head -2 | sed -e 's/Device: //g' -e 's/ ([^()]*)//g' -e 's/    //g')"
 
-
+gpudriver
 
 # ---------------------- Audio Information, Pipewire or Pulseaudio --------------
 # Check if user has pipewire installed
@@ -75,14 +92,14 @@ fi
 # ----- OUTPUT AND CLIPBOARD COPY ------
 
 #Visual printing:
-printf "$appvalue${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo \n$AudioInfo \n \n"
+printf "$appvalue${BLUE}${BOLD}--- Software --- ${RESET} \n$OSinfo \n$Plasmainfo \n$FWinfo \n$Qtinfo \n$Kernelinfo \n$Compositorinfo \n \n${BLUE}${BOLD}--- Hardware ---${RESET} \n$CPUinfo \n$RAMinfo \n$GPUinfo, $GPUdriver\n$AudioInfo \n \n"
 
 
 # Clipboard
 while true; do
     read -p "Copy to clipboard? (y/n) > " yn
     case $yn in
-        [Yy]* ) echo -e "$appvalue--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo\n$AudioInfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) >/dev/null && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
+        [Yy]* ) echo -e "$appvalue--- Software ---\n$OSinfo\n$Plasmainfo\n$FWinfo\n$Qtinfo\n$Kernelinfo\n$Compositorinfo\n\n--- Hardware ---\n$CPUinfo\n$RAMinfo\n$GPUinfo, $GPUdriver\n$AudioInfo"| tee >(wl-copy || xclip -selection clipboard || xsel -ib) >/dev/null && echo -e "\n🗒️ Copied to clipboard!"|| echo "Clipboard command not found. Install wl-clipboard for Wayland or xsel or xclip for X11." && break;;
         [Nn]* ) break;;
         * ) echo "Please answer yes or no.";;
     esac
