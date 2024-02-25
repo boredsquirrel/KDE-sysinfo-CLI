@@ -1,5 +1,8 @@
 #!/bin/bash
-
+#
+# This version works on Plasma 5, but not on Plasma 6
+#
+#
 # Define color and formatting variables
 BLUE='\033[0;34m'
 BOLD='\033[1m'
