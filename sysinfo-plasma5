@@ -36,7 +36,7 @@ if [[ $# -eq 1 && ( $1 == "-h" || $1 == "--help" ) ]]; then
 # if argument something else, see if its an app
 elif [[ $# -eq 1 ]]; then
     # check the app with various package managers
-    appvalue=package_info $1
+    appvalue=$(package_info $1)
     # if appvalue not existent, app not found. Maybe an exotic package manager is missing, feel free to add it!
     if [ -z "$appvalue" ]; then
       echo "Program not found"
